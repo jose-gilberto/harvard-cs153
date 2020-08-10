@@ -3,7 +3,7 @@ Me chamo Gilberto e estou estudando Ciência da Computação, minha paixão por 
 
 Como conhecia o projeto do [CC50](https://cc50.com.br/index.php), pensei algo semelhante, porém com conteúdo um pouco diferente, desta vez algo com compiladores, entrei em contato com o instrutor Stephen Chong, que apoiou a ideia e até disponibilizou keynotes. Como acredito que todos devem ter o mesmo acesso ao conhecimento, decidi por seguir o caminho do Gabriel, criador do CC50.
 
-Aqui serão incluidos apenas materiais traduzidos da disciplina além de alguns trechos de códigos. Optei por utilizar o docsify para gerar uma espécie de documentação, assim seria mais acessível do que os pdfs. Todo o material é apresentado em seções posteriores.
+Aqui serão incluidos apenas materiais traduzidos da disciplina além de alguns trechos de códigos. Optei por utilizar o [docsify](https://docsify.js.org/#/) para gerar uma espécie de documentação, assim seria mais acessível do que os pdfs. Todo o material é apresentado em seções posteriores.
 
 ## Guia
 
