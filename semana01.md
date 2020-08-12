@@ -342,3 +342,163 @@ let rec interpret_cmd (s:state) (c:cmd) : state =
   
 let init_state : state = fun _ -> 0
 ```
+
+## Assembly
+
+### Nessa seção
+- Vamos observar como converter C em código de máquina
+- Aprender sobre o Intelx86
+- x86Lite
+
+### Convertendo C em código de máquina
+
+![Conversão de Assembly para C](./assembly_c.png)
+
+Acima vemos a conversão de código c `somar.c`, para o código assembly `somar.s` e então para o código de máquina `somar.o`.
+
+### Pulando a etapa do Assembly
+
+- Muitos compiladores da linguagem C geram código de máquina (código objeto) diretamente
+  - Isso é, sem gerar um código assembly legível
+  - Linguagem assembly é mais usável para humanos, não para máquinas
+
+![Pulando a etapa do assembly no gcc](./pulando_assembly.png)
+
+- Podemos gerar o arquivo assembly do C utilizando o comando `gcc -S`
+  - Que pode ser compilado para código objeto manualmente utilizando o *gas*
+
+### Arquivos objeto e executáveis
+
+- Um arquivo fonte em C (`somar.c`) é compilado para um arquivo objeto (`somar.o`)
+  - O arquivo objeto contém código de máquina para aquele código C
+  - Pode conter referências para variáveis e rotinas externas
+  - Ex.: se `somar.c` chamar a rotina `printf()` então o `somar.o` irá conter uma referências para o `printf()`
+- Multiplos arquivos são *ligados* (**linked**) para produzir um programa executável
+  - Tipicamente, bibliotecas padrões (como a *libc*) são incluidas no processo
+  - Bibliotecas são somente coleções de códigos pré-compilados, nada mais!
+
+![Ligando os códigos em um executável](./ligando_codigos.png)
+
+### Características da linguagem Assembly
+
+- Assembly é uma linguagem muito, muito simples
+- Possui estruturas de dados simples
+  - dados inteiros de 1, 2, 4 ou 8 bytes
+  - dados de ponto flutuante de 4, 8 ou 10 bytes
+  - não existem estruturas de dados agregadas como arrays
+- Operações primitivas
+  - Performa operações aritméticas nos registradores ou na memória (Adição, multiplicação, etc)
+  - Lê dados da memória para o registrador
+  - Armazena dados do registrador na memória
+  - Controle de transferência do programa
+  - Testa uma flag de controle, um salto condicional (salta somente se a flag for 0)
+- Outras operações complexas devem ser desenvolvidas com uma sequências (muitas vezes longa) de instruções
+
+### Assembly vs Código de Máquina
+
+- Nós escrevemos instruções em Assembly
+  - Tais como: `addq %rbx, %rax`
+- A máquina interpreta código de máquina em bits
+  - 101011001100111...
+- O assembler cuida para que o código assembly seja compilado para bits
+  - Isso nos provê muitas conveniencias
+
+### Arquitetura do Intelx86
+
+- 1978: Intel introduces 8086
+- 1982: 80186, 80286
+- 1985: 80386
+- 1989: 80486   (100MHz, 1µm)
+- 1993: Pentium
+- 1995: Pentium Pro
+- 1997: Pentium II/III
+- 2000: Pentium 4
+- 2003: Pentium M, Intel Core
+- 2006: Intel Core 2
+- 2008: Intel Core i3/i5/i7
+- 2011: SandyBridge / IvyBridge
+- 2013: Haswell
+- 2014: Broadwell
+- 2015: Skylake (4.2GHz, 14nm)
+- AMD tem uma linha paralela de processadores
+
+### X86 vs. X86Lite
+
+- Assembly do X86 é muito complexo e complicado:
+  - 8-, 16-, 32-, 64-bits para valores de pontos flutuantes, etc
+  - Arquiteturas Intel64 e IA 32 tem um longo número de funções
+  - Instruções CISC complexas
+  - Código de máquina: o *range* do tamanho das intruções variam de 1 byte até 17 bytes
+  - Muitas decisões de design remanescentes para compatibilidade com versões anteriores
+  - Difícil de entender, há um grande livro sobre otimizações apenas no nível de seleção de instrução
+  - X86Lite é um simples subconjunto do X86:
+    - Somente 64 bits de inteiros sinalizados (+/-)
+    - Cerca de somente 20 instruções
+    - Suficiente como indioma de chegada para o propósito do curso.
+  
+### Esquema X86
+
+### Máquina de estados X86Lite: Registradores
+
+- Arquivo de registrador: 16 registradores 64-bit
+
+| Nome | Propósito |
+| ---- | --------- |
+| `rax` | Acumulador para propósitos gerais |
+| `rbx` | Registrador base, ponteiro para dados |
+| `rcx` | Registrador contador para strings e loops |
+| `rdx` | Registrador de dados para entrada/saída |
+| `rsi` | Registrador de ponteiro, registrador da fonte de strings |
+| `rdi` | Registrador de ponteiro, registrador de destino de strings |
+| `rbp` | Ponteiro base, aponta para a *stack frame* |
+| `rsp` | Ponteiro da pilha (*stack*), aponta para o topo da pilha |
+| `r08-r15` | Registradores para propósitos gerais |
+
+- `rip` é um registrador "virtual", que aponta para a instrução atual
+  - `rip` é manipulado diretamente e somente via `jumps`, saltos, e `return`, retornos.
+
+### Instrução mais simples: *mov*
+
+- `movq SRC, DEST` copia o SRC (fonte) para o DEST (destino)
+- Aqui DEST e SRC são operandos
+- DEST é tratado como uma localização
+  - Uma localização pode ser um registrador ou um endereço de memória
+- SRC é tratado como um valor
+  - Um valor pode ser o conteúdo de um registrador ou um endereço de memória
+  - Um valor pode ser uma constante ou um label
+- Exemplos:
+  - Move a constante de 64 bits com valor 4 para o `rax`  
+```nasm
+movq $4, %rax 
+```
+  - Move o conteúdo de `rbx` para o `rax`
+```nasm
+movq %rbx, %rax 
+```
+
+### Uma observação sobre a sintaxe da instrução
+
+- X86 apresenta duas formas de sintaxe
+- notação AT&T: `source` antes do `destination`, ou seja, fonte antes do destino
+```nasm
+movq $5, %rax
+movl $5, %eax
+```
+  - Prevalente nos ecossistemas UNIX/Mac
+  - Valores constantes são precedidos de um `$`
+  - Registradores são precedidos de um `%`
+  - Sufixos mnemônicos: `movq` vs `mov`
+    - `q` = quadword (4 palavras)
+    - `l` = long (2 palavras)
+    - `w` = word (1 palavra)
+    - `b` = byte
+- notação Intel: `destination` antes do `source`
+```nasm
+mov rax, 5
+mov eax, 5
+```
+  - Usada nas especificações da intel e manuais
+  - Prevalente no ecossistema Windows
+  - Variação das instruções são determinadas pelo nome do registrador
+- Obs.: X86Lite utiliza a notação AT&T e o formato de intruções e registradores de 64 bits
+
