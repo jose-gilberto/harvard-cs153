@@ -502,3 +502,77 @@ mov eax, 5
   - Variação das instruções são determinadas pelo nome do registrador
 - Obs.: X86Lite utiliza a notação AT&T e o formato de intruções e registradores de 64 bits
 
+### Desvio: Complemento de 2
+
+- Representar inteiros não negativos em bits é simples
+- Mas como representamos inteiros negativos em bits?
+- Três codificações comuns:
+  - Sinal e magnitude
+  - Complemento de um
+  - Complemento de dois
+
+### Comeplemento de 2
+
+- Se um inteiro `k` é representado por bits `b1, ..., bn`, então `-k` é representado por `100...00 - b1...bn` (onde `|100...00| = n + 1`)
+  - Equivalente a adicionarmos 1 no complemento de um
+  - Ex, usando 4 bits:
+    - **6** = `0110`
+    - **-6** = `10000-0110 = 1010 = (1111-0110) + 1`
+- Usando n bits, podemos representar números com valores de 2 elevado a n
+  - Exemplo, usando 4 bits, podemos representar inteiros:
+    - `-8, -7, ..., -1, 0, 1, ..., 6, 7`
+    - Como o sinal e magnitude e o complemento de 1, o primeiro bit indica se o número é negativo
+
+### Propriedades do complemento de 2
+
+- Mesma implementação de operações aritméticas como para não sinalizados (negativos)
+  - Ex.: adição usando 4 bits
+    - Sem sinal: `0001 + 1001 = 1 + 9 = 10 = 1010`
+    - Complemento de dois: `0001 + 1001 = 1 + -7 = -6 = 1010`
+- Uma representação de zero!
+  - Simples para implementar operações
+- Não é simétrico ao redor do zero
+  - Pode representar mais números negativos do que números positivos
+- A mais comum representação de números inteiros negativos
+
+### Overflow de inteiros
+
+- O overflow pode ocorrer também com números inteiros negativos
+- Com 32 bits, o maior número inteiro expressivo em complementos de 2 é 2 elevado a 31 menos 1, ou seja, `0x7fffffff`
+- `0x7fffffff + 0x1` = `0x80000000 = -2^31` (leia - dois elevado a trinta e um)
+  - Menor inteiro que podemos expressar em 32 bits com complemento de 2
+  - `0x80000000 + 0x80000000 = 0x0`
+
+### X86Lite: Instruções aritméticas
+
+- `negq DEST`: negação com complemento de 2
+- `addq SRC, DEST`: DEST ← DEST + SRC
+- `subq SRC, DEST`: DEST ← DEST - SRC
+- `imulq SRC, Reg`: Reg ← Reg * SRC (multiplação truncada em 128bits)
+- Exemplos:
+  - `addq %rbx, %rax` (rax ← rax + rbx)
+  - `subq $4, rsp` (rsp ← rsp -4)
+- Nota: Reg (em imulq) precisa ser um registrador, não um endereço de memória
+
+### X86Lite: Operações lógicas e manipulação de bits
+
+- `notq DEST`: negação lógica
+- `andq SRC, DEST`: DEST ← DEST && SRC
+- `orq SRC, DEST`: DEST ← DEST || SRC
+- `xorq SRC, DEST`: DEST ← DEST xor SRC
+- `sarq Amt, DEST`: DEST ← DEST >> amt (arithmetic shift right) 
+- `shlq Amt, DEST`: DEST ← DEST << amt (arithmetic shift left)
+- `shrq Amt, DEST`: DEST ← DEST >>> amt (bitwise shift right)
+
+### X86Lite: Operandos
+
+- Operandos são os valores operados em instruções assembly
+- lmm: inteiro de 64 bits com sinal - "Immediate"/Constante
+- Lbl: um 'label'/etiqueta representando um endereço de máquina.
+  - O assembler/linker/loader resolve esses labels
+- Reg: um dos 16 registradores, o valor de um registrador é seu conteúdo
+- Ind: `[base:Reg][index:Reg, scale:int32][disp]`
+  - Código de máquina
+
+### X86Lite: Endereçamento
+
